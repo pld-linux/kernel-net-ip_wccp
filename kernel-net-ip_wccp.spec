@@ -16,7 +16,7 @@ License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
-BuildRequires:	egcs
+BuildRequires:	%{kgcc}
 Obsoletes:	kernel-smp-net-%{_orig_name}
 Prereq:		/sbin/depmod
 %{!?_without_dist_kernel:%requires_releq_kernel_up}
@@ -48,13 +48,13 @@ Wsparcie protoko³u WCCP dla Linuksa SMP.
 install %{SOURCE0} .
 
 %build
-kgcc -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/include -Wall \
+%{kgcc} -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/include -Wall \
 	-Wstrict-prototypes -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
 	%{rpmcflags} -c %{_orig_name}.c
 
 mv -f %{_orig_name}.o %{_orig_name}smp.o
 
-kgcc -D__KERNEL__ -DMODULE -I%{_kernelsrcdir}/include -Wall -Wstrict-prototypes \
+%{kgcc} -D__KERNEL__ -DMODULE -I%{_kernelsrcdir}/include -Wall -Wstrict-prototypes \
 	-fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
 	%{rpmcflags} -c %{_orig_name}.c
 
