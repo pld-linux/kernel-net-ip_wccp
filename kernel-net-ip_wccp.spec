@@ -12,7 +12,7 @@ Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
-# Source0-md5:	054daf3b02fc5f83efc172f4bb69160b
+# NoSource0-md5:	054daf3b02fc5f83efc172f4bb69160b
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 BuildRequires:	%{kgcc_package}
 Prereq:		/sbin/depmod
