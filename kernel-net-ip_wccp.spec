@@ -5,7 +5,7 @@
 %define		_kernel_ver	%(grep UTS_RELEASE %{_kernelsrcdir}/include/linux/version.h 2>/dev/null | cut -d'"' -f2)
 %define		_kernel_ver_str	%(echo %{_kernel_ver} | sed s/-/_/g)
 %define         _orig_name      ip_wccp
-%define		_rel	4
+%define		_rel	5
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
@@ -18,8 +18,7 @@ Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 Obsoletes:	kernel-smp-net-%{_orig_name}
 Prereq:		/sbin/depmod
-%{!?_without_dist_kernel:Conflicts:     kernel < %{_kernel_ver}, kernel > %{_kernel_ver}}
-%{!?_without_dist_kernel:Conflicts:     kernel-smp}
+%{!?_without_dist_kernel:Requires:     kernel-up = %{_kernel_ver}}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -33,8 +32,7 @@ Wsparcie protoko³u WCCP dla Linuxa.
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Release:	%{_rel}@%{_kernel_ver_str}
-%{!?_without_dist_kernel:Conflicts:     kernel < %{_kernel_ver}, kernel > %{_kernel_ver}}
-%{!?_without_dist_kernel:Conflicts:     kernel-up}
+%{!?_without_dist_kernel:Requires:     kernel-smp = %{_kernel_ver}}
 Group:		Base/Kernel
 Obsoletes:	kernel-net-%{_orig_name}
 Prereq:		/sbin/depmod
