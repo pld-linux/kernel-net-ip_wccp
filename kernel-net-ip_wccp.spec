@@ -3,7 +3,7 @@
 # _without_dist_kernel          without distribution kernel
 
 %define         _orig_name      ip_wccp
-%define		_rel	8
+%define		_rel	9
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
