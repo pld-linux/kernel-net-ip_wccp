@@ -13,6 +13,7 @@ Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
+# Source0-md5:	e89162e7df3d95a5d0684296ad52aec4
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 BuildRequires:	%{kgcc_package}
 %{!?_without_dist_kernel:%requires_releq_kernel_up}
