@@ -5,7 +5,7 @@
 %define		_kernel_ver	%(grep UTS_RELEASE %{_kernelsrcdir}/include/linux/version.h 2>/dev/null | cut -d'"' -f2)
 %define		_kernel_ver_str	%(echo %{_kernel_ver} | sed s/-/_/g)
 %define         _orig_name      ip_wccp
-%define		_rel	2
+%define		_rel	3
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
@@ -17,7 +17,7 @@ Group:		Base/Kernel
 Group(de):	Grundsätzlich/Kern
 Group(pl):	Podstawowe/J±dro
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
-%{!?_without_dist_kernel:BuildRequires:         kernel-headers < 2.4.0 }
+%{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 Obsoletes:	kernel-smp-net-%{_orig_name}
 Prereq:		/sbin/depmod
 %{!?_without_dist_kernel:Conflicts:     kernel < %{_kernel_ver}, kernel > %{_kernel_ver}}
