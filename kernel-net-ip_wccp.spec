@@ -68,11 +68,22 @@ mv -f %{_orig_name}.o %{_orig_name}smp.o
 %endif
 	%{rpmcflags} -c %{_orig_name}.c
 %else
-ln -sf %{_kernelsrcdir}/config-up .config
+install -d include/{linux,config}
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-smp.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
+touch include/config/MARKER
+
+ln -sf %{_kernelsrcdir}/config-smp .config
 echo 'obj-m := %{_orig_name}.o' > Makefile
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
 mv -f %{_orig_name}.ko %{_orig_name}smp.ko-done
-ln -sf %{_kernelsrcdir}/config-smp .config
+
+rm -rf include
+install -d include/{linux,config}
+ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h include/linux/autoconf.h
+ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
+touch include/config/MARKER
+ln -sf %{_kernelsrcdir}/config-up .config
 %{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 clean modules
 %endif
 
