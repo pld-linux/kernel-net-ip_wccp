@@ -1,10 +1,8 @@
 #
 # Conditional build:
-# _without_dist_kernel          without distribution kernel
+%bcond_without  dist_kernel	# without distribution kernel
+%bcond_without  smp		# don't build SMP module
 #
-%bcond_without  dist_kernel
-%bcond_without  smp
-
 %define         _orig_name      ip_wccp
 
 Summary:	Kernel module for WCCP protocol
@@ -17,10 +15,10 @@ License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}-%{version}.tar.gz
 # Source0-md5:	5c198bb4aa26cab8c7576664c0f257b9
-%{!?_without_dist_kernel:BuildRequires:	kernel-headers >= 2.4.0}
+%{?with_dist_kernel:BuildRequires:	kernel-module-build >= 2.6.0}
 BuildRequires:	%{kgcc_package}
 BuildRequires:	rpmbuild(macros) >= 1.118
-%{!?_without_dist_kernel:%requires_releq_kernel_up}
+%{?with_dist_kernel:%requires_releq_kernel_up}
 Requires(post,postun):	/sbin/depmod
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -35,7 +33,7 @@ Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-%{!?_without_dist_kernel:%requires_releq_kernel_smp}
+%{?with_dist_kernel:%requires_releq_kernel_smp}
 Requires(post,postun):	/sbin/depmod
 
 %description -n kernel-smp-net-%{_orig_name}
