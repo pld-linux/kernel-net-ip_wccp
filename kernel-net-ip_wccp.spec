@@ -14,8 +14,18 @@ Version:	0.1
 Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
+Group(cs):	Základ/Jádro
+Group(da):	Basal/Kerne
 Group(de):	Grundsätzlich/Kern
+Group(es):	Base/Núcleo
+Group(fr):	Base/Noyau
+Group(it):	Base/Kernel
+Group(ja):	¥Ù¡¼¥¹/¥«¡¼¥Í¥ë
+Group(no):	Basis/Kjerne
 Group(pl):	Podstawowe/J±dro
+Group(pt):	Base/Núcleo
+Group(ru):	âÁÚÏ×ÙÊ ÎÁÂÏÒ/ñÄÒÏ
+Group(sv):	Bas/Kärna
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 Obsoletes:	kernel-smp-net-%{_orig_name}
@@ -32,16 +42,26 @@ Wsparcie protoko³u WCCP dla Linuxa.
 
 
 %package -n kernel-smp-net-%{_orig_name}
-Summary:        Kernel module for WCCP protocol
-Summary(pl):    Modu³ kernela do obs³ugi protoko³u WCCP
-Release:        %{_rel}@%{_kernel_ver_str}
+Summary:	Kernel module for WCCP protocol
+Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
+Release:	%{_rel}@%{_kernel_ver_str}
 %{!?_without_dist_kernel:Conflicts:     kernel < %{_kernel_ver}, kernel > %{_kernel_ver}}
 %{!?_without_dist_kernel:Conflicts:     kernel-up}
-Group:          Base/Kernel
-Group(de):      Grundsätzlich/Kern
-Group(pl):      Podstawowe/J±dro
-Obsoletes:      kernel-net-%{_orig_name}
-Prereq:         /sbin/depmod
+Group:		Base/Kernel
+Group(cs):	Základ/Jádro
+Group(da):	Basal/Kerne
+Group(de):	Grundsätzlich/Kern
+Group(es):	Base/Núcleo
+Group(fr):	Base/Noyau
+Group(it):	Base/Kernel
+Group(ja):	¥Ù¡¼¥¹/¥«¡¼¥Í¥ë
+Group(no):	Basis/Kjerne
+Group(pl):	Podstawowe/J±dro
+Group(pt):	Base/Núcleo
+Group(ru):	âÁÚÏ×ÙÊ ÎÁÂÏÒ/ñÄÒÏ
+Group(sv):	Bas/Kärna
+Obsoletes:	kernel-net-%{_orig_name}
+Prereq:		/sbin/depmod
 
 %description -n kernel-smp-net-%{_orig_name}
 WCCP protocol support for Linux SMP.
@@ -92,4 +112,5 @@ rm -rf $RPM_BUILD_ROOT
 /lib/modules/%{_kernel_ver}/ipv4/*
 
 %files -n kernel-smp-net-%{_orig_name}
+%defattr(644,root,root,755)
 /lib/modules/%{_kernel_ver}smp/ipv4/*
