@@ -51,6 +51,7 @@ install %{SOURCE1} %{_orig_name}.c
 %endif
 
 %build
+%if %{_kernel24}
 %{kgcc} -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/include -Wall \
 	-Wstrict-prototypes -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
 %ifarch %{ix86}
@@ -66,13 +67,26 @@ mv -f %{_orig_name}.o %{_orig_name}smp.o
         -I%{_kernelsrcdir}/include/asm-i386/mach-default \
 %endif
 	%{rpmcflags} -c %{_orig_name}.c
+%else
+ln -sf %{_kernelsrcdir}/config-up .config
+echo 'obj-m := %{_orig_name}.o' > Makefile
+%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
+mv -f %{_orig_name}.ko %{_orig_name}smp.ko-done
+ln -sf %{_kernelsrcdir}/config-smp .config
+%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 clean modules
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc
-cp %{_orig_name}.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+%if %{_kernel24}
+cp %{_orig_name}.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/%{_orig_name}.o
 cp %{_orig_name}smp.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/%{_orig_name}.o
+%else
+cp %{_orig_name}.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/%{_orig_name}.ko
+cp %{_orig_name}smp.ko-done $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/%{_orig_name}.ko
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
