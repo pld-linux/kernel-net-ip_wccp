@@ -16,7 +16,7 @@ License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
-BuildRequires:	%{kgcc}
+BuildRequires:	%{kgcc_package}
 Obsoletes:	kernel-smp-net-%{_orig_name}
 Prereq:		/sbin/depmod
 %{!?_without_dist_kernel:%requires_releq_kernel_up}
