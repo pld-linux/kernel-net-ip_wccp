@@ -3,6 +3,7 @@
 # _without_dist_kernel          without distribution kernel
 #
 %define         _orig_name      ip_wccp
+%define		_kernel24	%(echo %{_kernel_ver} | grep -qv '2\.4\.' ; echo $?)
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
@@ -13,6 +14,7 @@ Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
+Source1:	http://ftp.yars.free.net/pub/software/unix/platforms/linux/kernel/drivers/ip_wccp-for2.6.0.c
 %{!?_without_dist_kernel:BuildRequires:	kernel-headers >= 2.4.0}
 BuildRequires:	%{kgcc_package}
 BuildRequires:	rpmbuild(macros) >= 1.118
@@ -42,17 +44,27 @@ Wsparcie protoko³u WCCP dla Linuksa SMP.
 
 %prep
 %setup -q -T -c
-install %{SOURCE0} .
+%if %{_kernel24}
+install %{SOURCE0} %{_orig_name}.c
+%else
+install %{SOURCE1} %{_orig_name}.c
+%endif
 
 %build
 %{kgcc} -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/include -Wall \
 	-Wstrict-prototypes -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
+%ifarch %{ix86}
+	-I%{_kernelsrcdir}/include/asm-i386/mach-default \
+%endif
 	%{rpmcflags} -c %{_orig_name}.c
 
 mv -f %{_orig_name}.o %{_orig_name}smp.o
 
 %{kgcc} -D__KERNEL__ -DMODULE -I%{_kernelsrcdir}/include -Wall -Wstrict-prototypes \
 	-fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
+%ifarch %{ix86}
+        -I%{_kernelsrcdir}/include/asm-i386/mach-default \
+%endif
 	%{rpmcflags} -c %{_orig_name}.c
 
 %install
