@@ -5,7 +5,7 @@
 %define		_kernel_ver	%(grep UTS_RELEASE %{_kernelsrcdir}/include/linux/version.h 2>/dev/null | cut -d'"' -f2)
 %define		_kernel_ver_str	%(echo %{_kernel_ver} | sed s/-/_/g)
 %define         _orig_name      ip_wccp
-%define		_rel	5
+%define		_rel	6
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
@@ -16,23 +16,23 @@ License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
+BuildRequires:	egcs
 Obsoletes:	kernel-smp-net-%{_orig_name}
 Prereq:		/sbin/depmod
-%{!?_without_dist_kernel:Requires:     kernel-up = %{_kernel_ver}}
+%{!?_without_dist_kernel:%requires_releq_kernel_up}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 WCCP protocol support for Linux.
 
 %description -l pl
-Wsparcie protoko³u WCCP dla Linuxa.
-
+Wsparcie protoko³u WCCP dla Linuksa.
 
 %package -n kernel-smp-net-%{_orig_name}
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Release:	%{_rel}@%{_kernel_ver_str}
-%{!?_without_dist_kernel:Requires:     kernel-smp = %{_kernel_ver}}
+%{!?_without_dist_kernel:%requires_releq_kernel_smp}
 Group:		Base/Kernel
 Obsoletes:	kernel-net-%{_orig_name}
 Prereq:		/sbin/depmod
@@ -41,8 +41,7 @@ Prereq:		/sbin/depmod
 WCCP protocol support for Linux SMP.
 
 %description -n kernel-smp-net-%{_orig_name} -l pl
-Wsparcie protoko³u WCCP dla Linuxa SMP.
-
+Wsparcie protoko³u WCCP dla Linuksa SMP.
 
 %prep
 %setup -q -T -c
@@ -53,7 +52,7 @@ kgcc -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/
 	-Wstrict-prototypes -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
 	%{rpmcflags} -c %{_orig_name}.c
 
-mv %{_orig_name}.o %{_orig_name}smp.o
+mv -f %{_orig_name}.o %{_orig_name}smp.o
 
 kgcc -D__KERNEL__ -DMODULE -I%{_kernelsrcdir}/include -Wall -Wstrict-prototypes \
 	-fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
