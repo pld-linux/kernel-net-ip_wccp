@@ -4,6 +4,10 @@
  * Glenn Chisholm <glenn@ircache.net>
  *
  * Change log:
+ *   2003-10-20 Henrik Nordstrom <hno@squid-cache.org>
+ *   		Dropped support for old kernels. Linux-2.4 or later required
+ *   		Play well with Netfilter
+ *
  *   2002-04-16 francis a. vidal <francisv@dagupan.com>
  *		Module license tag
  *
@@ -18,18 +22,22 @@
  *              Original release
  */
 
+
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
+#include <asm/uaccess.h>
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <linux/in.h>
 #include <linux/if_arp.h>
 #include <linux/init.h>
 #include <linux/inetdevice.h>
-#include <net/checksum.h>
+#include <linux/netfilter_ipv4.h>
+#include <net/ip.h>
+#include <net/inet_ecn.h>
 
 #include <net/ip.h>
 
@@ -45,47 +53,49 @@ MODULE_LICENSE("GPL");
 #endif
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
+static inline void ip_wccp_ecn_decapsulate(struct iphdr *outer_iph, struct sk_buff *skb)
+{
+	struct iphdr *inner_iph = skb->nh.iph;
+
+	if (INET_ECN_is_ce(outer_iph->tos) &&
+	    INET_ECN_is_not_ce(inner_iph->tos))
+		IP_ECN_set_ce(inner_iph);
+}
+
+
 int ip_wccp_rcv(struct sk_buff *skb)
-#else
-int ip_wccp_rcv(struct sk_buff *skb, unsigned short len)
-#endif
 {
 	u32  *gre_hdr;
 	u8   *h;
+	struct iphdr *iph;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
 	if (!pskb_may_pull(skb, 16))
 		goto drop;
-#endif
 
+	iph = skb->nh.iph;
 	gre_hdr = (u32 *)skb->h.raw;
 	h = skb->data;
 	if(*gre_hdr != htonl(WCCP_PROTOCOL_TYPE)) 
 		goto drop;
 
 	skb->mac.raw = skb->nh.raw;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
 	skb->nh.raw = pskb_pull(skb, WCCP_GRE_LEN);
-#else /* old kernels */
-	skb->nh.raw = skb_pull(skb, skb->h.raw + WCCP_GRE_LEN - skb->data);
-	if (skb->len <= 0) 
-                goto drop;
-#endif
 	memset(&(IPCB(skb)->opt), 0, sizeof(struct ip_options));
-	skb->protocol = __constant_htons(ETH_P_IP);
+	skb->protocol = htons(ETH_P_IP);
 	skb->pkt_type = PACKET_HOST;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,4,0)
-	if (skb->ip_summed == CHECKSUM_HW)
-		skb->csum = csum_sub(skb->csum,
-				     csum_partial(skb->mac.raw, skb->nh.raw-skb->mac.raw, 0));
-#else
-	skb->ip_summed = 0;
-#endif
+
 	dst_release(skb->dst);
 	skb->dst = NULL;
-
-	return ip_rcv(skb, skb->dev, NULL);
+#ifdef CONFIG_NETFILTER
+	nf_conntrack_put(skb->nfct);
+	skb->nfct = NULL;
+#ifdef CONFIG_NETFILTER_DEBUG
+	skb->nf_debug = 0;
+#endif
+#endif
+	ip_wccp_ecn_decapsulate(iph, skb);
+	netif_rx(skb);
+	return(0);
 
 drop:
 	kfree_skb(skb);
@@ -102,17 +112,22 @@ static struct inet_protocol ipgre_protocol = {
   "GRE"     
 };
 
-int init_module(void) 
+int __init ip_wccp_init(void)
 {
 	printk(KERN_INFO "WCCP IPv4/GRE driver\n");
 	inet_add_protocol(&ipgre_protocol);
 	return 0;
 }
 
-void cleanup_module(void)
+static void __exit ip_wccp_fini(void)
 {
 	if ( inet_del_protocol(&ipgre_protocol) < 0 )
 		printk(KERN_INFO "ipgre close: can't remove protocol\n");
 	else
 		printk(KERN_INFO "WCCP IPv4/GRE driver unloaded\n");
 }
+
+#ifdef MODULE
+module_init(ip_wccp_init);
+#endif
+module_exit(ip_wccp_fini);
