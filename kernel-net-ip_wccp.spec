@@ -1,4 +1,3 @@
-
 # conditional build
 # _without_dist_kernel          without distribution kernel
 
@@ -8,7 +7,7 @@ Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Name:		kernel-net-%{_orig_name}
 Version:	0.1
-%define	_rel	11
+%define	_rel	12
 Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
