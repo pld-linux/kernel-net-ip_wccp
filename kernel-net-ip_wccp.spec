@@ -7,11 +7,12 @@ Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Name:		kernel-net-%{_orig_name}
 Version:	0.1
-%define	_rel	13
+%define	_rel	14
 Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
 Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
+# Source0-md5:	054daf3b02fc5f83efc172f4bb69160b
 %{!?_without_dist_kernel:BuildRequires:         kernel-headers}
 BuildRequires:	%{kgcc_package}
 Prereq:		/sbin/depmod
