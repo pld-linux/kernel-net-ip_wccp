@@ -2,19 +2,21 @@
 # Conditional build:
 # _without_dist_kernel          without distribution kernel
 #
+%bcond_without  dist_kernel
+%bcond_without  smp
+
 %define         _orig_name      ip_wccp
-%define		_kernel24	%(echo %{_kernel_ver} | grep -qv '2\.4\.' ; echo $?)
 
 Summary:	Kernel module for WCCP protocol
 Summary(pl):	Modu³ kernela do obs³ugi protoko³u WCCP
 Name:		kernel-net-%{_orig_name}
-Version:	0.2
+Version:	1.6.2
 %define	_rel	1
 Release:	%{_rel}@%{_kernel_ver_str}
 License:	GPL
 Group:		Base/Kernel
-Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}.c
-Source1:	http://ftp.yars.free.net/pub/software/unix/platforms/linux/kernel/drivers/ip_wccp-for2.6.0.c
+Source0:	http://www.squid-cache.org/WCCP-support/Linux/%{_orig_name}-%{version}.tar.gz
+# Source0-md5:	5c198bb4aa26cab8c7576664c0f257b9
 %{!?_without_dist_kernel:BuildRequires:	kernel-headers >= 2.4.0}
 BuildRequires:	%{kgcc_package}
 BuildRequires:	rpmbuild(macros) >= 1.118
@@ -43,61 +45,33 @@ WCCP protocol support for Linux SMP.
 Wsparcie protoko³u WCCP dla Linuksa SMP.
 
 %prep
-%setup -q -T -c
-%if %{_kernel24}
-install %{SOURCE0} %{_orig_name}.c
-%else
-install %{SOURCE1} %{_orig_name}.c
-%endif
+%setup -q -n %{_orig_name}-%{version}
 
 %build
-%if %{_kernel24}
-%{kgcc} -D__KERNEL__ -DMODULE -D__SMP__ -DCONFIG_X86_LOCAL_APIC -I%{_kernelsrcdir}/include -Wall \
-	-Wstrict-prototypes -fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
-%ifarch %{ix86}
-	-I%{_kernelsrcdir}/include/asm-i386/mach-default \
-%endif
-	%{rpmcflags} -c %{_orig_name}.c
-
-mv -f %{_orig_name}.o %{_orig_name}smp.o
-
-%{kgcc} -D__KERNEL__ -DMODULE -I%{_kernelsrcdir}/include -Wall -Wstrict-prototypes \
-	-fomit-frame-pointer -fno-strict-aliasing -pipe -fno-strength-reduce \
-%ifarch %{ix86}
-        -I%{_kernelsrcdir}/include/asm-i386/mach-default \
-%endif
-	%{rpmcflags} -c %{_orig_name}.c
-%else
-install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf-smp.h include/linux/autoconf.h
-ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
-touch include/config/MARKER
-
-ln -sf %{_kernelsrcdir}/config-smp .config
-echo 'obj-m := %{_orig_name}.o' > Makefile
-%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 modules
-mv -f %{_orig_name}.ko %{_orig_name}smp.ko-done
-
-rm -rf include
-install -d include/{linux,config}
-ln -sf %{_kernelsrcdir}/include/linux/autoconf-up.h include/linux/autoconf.h
-ln -sf %{_kernelsrcdir}/include/asm-%{_arch} include/asm
-touch include/config/MARKER
-ln -sf %{_kernelsrcdir}/config-up .config
-%{__make} -C %{_kernelsrcdir} SUBDIRS=$PWD O=$PWD V=1 clean modules
-%endif
-
+for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
+    if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
+        exit 1
+    fi
+    rm -rf include
+    install -d include/{linux,config}
+    ln -sf %{_kernelsrcdir}/config-$cfg .config
+    ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
+    ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
+    touch include/config/MARKER
+    %{__make} -C %{_kernelsrcdir} clean modules \
+    EXTRA_CFLAGS="-I../include -DFUSE_VERSION='1.1'" \
+    RCS_FIND_IGNORE="-name '*.ko' -o" \
+    M=$PWD O=$PWD \
+    %{?with_verbose:V=1}
+    mv %{_orig_name}.ko %{_orig_name}-$cfg.ko
+done
+										
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc
-%if %{_kernel24}
-cp %{_orig_name}.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/%{_orig_name}.o
-cp %{_orig_name}smp.o $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/%{_orig_name}.o
-%else
-cp %{_orig_name}.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/%{_orig_name}.ko
-cp %{_orig_name}smp.ko-done $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/%{_orig_name}.ko
-%endif
+cp %{_orig_name}-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/%{_orig_name}.ko
+cp %{_orig_name}-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/%{_orig_name}.ko
 
 %clean
 rm -rf $RPM_BUILD_ROOT
