@@ -1,7 +1,7 @@
 #
 # Conditional build:
-%bcond_without  dist_kernel	# without distribution kernel
-%bcond_without  smp		# don't build SMP module
+%bcond_without	dist_kernel	# without distribution kernel
+%bcond_without	smp		# don't build SMP module
 #
 %define         _orig_name      ip_wccp
 
