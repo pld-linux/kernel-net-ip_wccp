@@ -7,7 +7,7 @@
 
 %define	_rel	1
 Summary:	Kernel module for WCCP protocol
-Summary(pl.UTF-8):   Moduł kernela do obsługi protokołu WCCP
+Summary(pl.UTF-8):	Moduł kernela do obsługi protokołu WCCP
 Name:		kernel-net-%{_orig_name}
 Version:	1.6.2
 Release:	%{_rel}@%{_kernel_ver_str}
@@ -30,7 +30,7 @@ Wsparcie protokołu WCCP dla Linuksa.
 
 %package -n kernel-smp-net-%{_orig_name}
 Summary:	Kernel module for WCCP protocol
-Summary(pl.UTF-8):   Moduł kernela do obsługi protokołu WCCP
+Summary(pl.UTF-8):	Moduł kernela do obsługi protokołu WCCP
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_smp}
